@@ -1,0 +1,46 @@
+{
+    "version": 1,
+    "name": "KartInputActions",
+    "maps": [
+        {
+            "name": "Kart",
+            "id": "7bc27ad1-5044-4e95-8101-35ae6482608f",
+            "actions": [
+                {
+                    "name": "Steer",
+                    "type": "Value",
+                    "id": "11fb9e95-646b-4201-9746-01f7ffcbd70b",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "488e55ae-cca0-406f-bc38-51e34d4a1e09",
+                    "path": "<XRController>{LeftHand}/devicePosition/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Steer",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "61398851-8e64-4ed5-b500-a4ef5df9e155",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Steer",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
