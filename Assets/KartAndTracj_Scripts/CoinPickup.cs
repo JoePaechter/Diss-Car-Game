@@ -12,6 +12,8 @@ public class CoinPickup : MonoBehaviour
     public float haptic_amplitude;
     public float haptic_duration;
     public int scoreAmount = 1;
+    public CoinSpawner coinSpawner;
+
 
     private void Awake()
     {
@@ -24,11 +26,17 @@ public class CoinPickup : MonoBehaviour
         {
             Debug.Log("coin picked up!");
             //coin_pickup_sound.Play();
+            ScoreTracker.Instance.addScore(scoreAmount);
             SoundTracker.Instance.PlayCoinPickup();
             playLeftHaptic(haptic_amplitude, haptic_duration);
             Destroy(gameObject, 0.1f);
+            coinSpawner.RemoveCoinFromList(gameObject);
+            
+            
+            
 
-            ScoreTracker.Instance.addScore(scoreAmount);
+
+            
 
         }
     }

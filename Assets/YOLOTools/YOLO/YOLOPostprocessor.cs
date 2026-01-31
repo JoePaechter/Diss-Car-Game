@@ -29,6 +29,10 @@ namespace YOLOTools.YOLO
                 float width = result[0, 2, i] * widthScale;
                 float height = result[0, 3, i] * heightScale;
 
+                
+                 
+
+
                 objects.Add(new DetectedObject(centerX, centerY, width, height, cocoClass, classes[cocoClass],
                     confidence));
             }
@@ -50,7 +54,7 @@ namespace YOLOTools.YOLO
                 var cy = (obj.box.y1 + obj.box.y2) / 2;
                 var width = (obj.box.x2 - obj.box.x1);
                 var height = (obj.box.y2 - obj.box.y1);
-                results.Add(new DetectedObject(cx, cy, width, height, obj.class_id, obj.name, obj.confidence));
+                //results.Add(new DetectedObject(cx, cy, width, height, obj.class_id, obj.name, obj.confidence));
             }
 
             return results;

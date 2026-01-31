@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class MagnetPickup : MonoBehaviour
 {
+    public CoinSpawner coinSpawner;
     private void OnTriggerEnter(Collider other)
     {
         if (other.GetComponent<kart>())
@@ -13,7 +14,7 @@ public class MagnetPickup : MonoBehaviour
             }
 
             Destroy(gameObject);
-
+            coinSpawner.RemovepowerUpFromList(gameObject);
         }
     }
 

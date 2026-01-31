@@ -24,6 +24,11 @@ public class kart : MonoBehaviour, CollisionResponderInterface
     private Color originalColor;
     private Material kartMaterial;
 
+    public Vector3 startPosition;
+    public Quaternion startRotation;
+
+    public GameManager gameManager;
+
 
 
 
@@ -45,6 +50,8 @@ public class kart : MonoBehaviour, CollisionResponderInterface
             kartMaterial = kartRenderer.material;
             originalColor = kartMaterial.color;
         }
+
+        
 
     }
     void OnEnable()
@@ -122,6 +129,8 @@ public class kart : MonoBehaviour, CollisionResponderInterface
     {
   
         //steer_speed *= 0.1f;
+        
+
     }
 
     public void OnCarExit()
@@ -204,6 +213,8 @@ public class kart : MonoBehaviour, CollisionResponderInterface
         OnCarHit();
         if (kartMaterial == null) return;
         kartMaterial.color = crashColor;
+        gameManager.endGame();
+
     }
 
     public void OnCollisionCleared()
@@ -213,5 +224,9 @@ public class kart : MonoBehaviour, CollisionResponderInterface
         kartMaterial.color = originalColor;
     }
 
+    public void ResetKart()
+    {
+        transform.SetPositionAndRotation(startPosition, startRotation);
 
+    }
 }

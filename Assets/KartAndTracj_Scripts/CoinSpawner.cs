@@ -1,4 +1,8 @@
+
 using UnityEngine;
+using System.Collections.Generic;
+
+
 
 public class CoinSpawner : MonoBehaviour
 {
@@ -18,6 +22,11 @@ public class CoinSpawner : MonoBehaviour
     private float magnetTimer;
     public float spawnInterval = 1.0f;
     private float timer;
+
+    private List<GameObject> coinsSpawned = new List<GameObject>();
+    private List<GameObject> powerUpsSpawned = new List<GameObject>();
+
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -55,6 +64,8 @@ public class CoinSpawner : MonoBehaviour
 
         coin.GetComponent<CoinMovement>().track = track;
         coin.GetComponent<CoinMovement>().kart = kart;
+
+        coinsSpawned.Add(coin); 
     }
 
     void SpawnMagnet()
@@ -74,6 +85,38 @@ public class CoinSpawner : MonoBehaviour
 
         magnet.GetComponent<MagnetMovement>().track = track;
 
+        powerUpsSpawned.Add(magnet);
+
 
     }
+
+    public void resetCoinsAndPowerups()
+    {
+        foreach (var c in coinsSpawned)
+        {
+            Destroy(c);
+        }
+
+        foreach(var p in powerUpsSpawned)
+        {
+            Destroy(p);
+        }
+
+        coinsSpawned.Clear();
+        powerUpsSpawned.Clear();
+
+        timer = 0f;
+        magnetTimer = 0f;
+    }
+
+    public void RemoveCoinFromList(GameObject coin)
+    {
+        coinsSpawned.Remove(coin);
+    }
+    public void RemovepowerUpFromList(GameObject powerUp)
+    {
+        powerUpsSpawned.Remove(powerUp);
+    }
+
+
 }

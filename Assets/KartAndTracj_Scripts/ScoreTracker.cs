@@ -41,4 +41,10 @@ public class ScoreTracker : MonoBehaviour
             scoreText.text = $"Score: {score}";
         }
     }
+
+    public void resetScore()
+    {
+        score = 0 ;
+        updateScore();
+    }
 }
