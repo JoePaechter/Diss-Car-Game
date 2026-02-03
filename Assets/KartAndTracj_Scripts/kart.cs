@@ -1,3 +1,4 @@
+using Oculus.Interaction;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using YOLOTools.YOLO;
@@ -29,6 +30,10 @@ public class kart : MonoBehaviour, CollisionResponderInterface
 
     public GameManager gameManager;
 
+    private InvincibilityController inv;
+
+    private SpeedController speed;
+
 
 
 
@@ -51,7 +56,11 @@ public class kart : MonoBehaviour, CollisionResponderInterface
             originalColor = kartMaterial.color;
         }
 
-        
+        inv = GetComponent<InvincibilityController>();
+
+        speed = GetComponent<SpeedController>();
+
+
 
     }
     void OnEnable()
@@ -69,7 +78,17 @@ public class kart : MonoBehaviour, CollisionResponderInterface
     // Update is called once per frame
     void Update()
     {
+        if (inv == null )
+        {
+            inv = GetComponent<InvincibilityController>();
+        }
+        if (speed == null) 
+        { 
+            speed= GetComponent<SpeedController>();
+        }
+
         transform.localRotation = Quaternion.identity;
+        IsSpeedpowerUp();
         HandleMovement();
     }
 
@@ -210,10 +229,13 @@ public class kart : MonoBehaviour, CollisionResponderInterface
 
     public void OnCollisionDetected()
     {
-        OnCarHit();
-        if (kartMaterial == null) return;
-        kartMaterial.color = crashColor;
-        gameManager.endGame();
+        if (!inv.InvOn)
+        {
+            OnCarHit();
+            if (kartMaterial == null) return;
+            kartMaterial.color = crashColor;
+            gameManager.endGame();
+        }
 
     }
 
@@ -228,5 +250,17 @@ public class kart : MonoBehaviour, CollisionResponderInterface
     {
         transform.SetPositionAndRotation(startPosition, startRotation);
 
+    }
+
+    public void IsSpeedpowerUp()
+    {
+        if (speed.SpeedOn)
+        {
+            steer_speed = 3f;
+        }
+        else
+        {
+            steer_speed = 2f;
+        }
     }
 }

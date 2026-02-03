@@ -477,6 +477,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CoinSpawner
   coinPrefab: {fileID: 3233789157572268774, guid: 7a1386b6fe4b18f419c953a7349a7742, type: 3}
   magnetPrefab: {fileID: 4307268013813906778, guid: aab34390493e7b840ba5dab9551fc7c9, type: 3}
+  InvPrefab: {fileID: 266097569084595815, guid: 7a554a6ecb16ef24fbdb15ccbf435931, type: 3}
+  SpeedPrefab: {fileID: 7558406939553415604, guid: 51c6214301ddf6c4f846f8ee6f7fd146, type: 3}
   track: {fileID: 1397250436}
   kartAnchor: {fileID: 674023432}
   kart: {fileID: 1230243597}
@@ -485,6 +487,8 @@ MonoBehaviour:
   trackHalfWidth: 10
   magnetChance: 0.2
   magnetInterval: 8
+  InvInterval: 8
+  SpeedInterval: 8
   spawnInterval: 1
 --- !u!1 &376973003
 GameObject:
@@ -592,7 +596,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &464377752
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1746,6 +1750,8 @@ GameObject:
   - component: {fileID: 1230243600}
   - component: {fileID: 1230243599}
   - component: {fileID: 1230243601}
+  - component: {fileID: 1230243602}
+  - component: {fileID: 1230243603}
   m_Layer: 0
   m_Name: Kart
   m_TagString: Untagged
@@ -1855,6 +1861,32 @@ MonoBehaviour:
   magnetArea: 10
   magnetAttraction: 10
   magnetDuration: 10
+--- !u!114 &1230243602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1230243596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22b9a5f935eab4d41814f24290c23e8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InvincibilityController
+  InvDuration: 4
+--- !u!114 &1230243603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1230243596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 676252b3832cf034b8f53307d32ec766, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpeedController
+  SpeedDuration: 10
 --- !u!1 &1241364534
 GameObject:
   m_ObjectHideFlags: 0
