@@ -929,13 +929,13 @@ RectTransform:
   m_GameObject: {fileID: 668968704}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 464377755}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -367, y: -394.5}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1525,6 +1525,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73e1bfe1682c91e4fa6e60bdb0b54288, type: 3}
   m_Name: 
   m_EditorClassIdentifier: YOLOTools.YOLO.Display::BoundingBoxDisplayManager
+  interpolationRate: 25
+  predictionStrength: 0.7
+  newObjectThreshold: 180
+  ObjectCoolDown: 0.3
+  velocirty_smoothing: 0.7
+  minFrames: 1
+  screenPadding: 50
   _videoFeedManager: {fileID: 954090023}
 --- !u!1 &1095802685
 GameObject:
@@ -3133,7 +3140,7 @@ PrefabInstance:
       objectReference: {fileID: 954090030}
     - target: {fileID: 3220547500283905716, guid: fdc1341c6728905408cd90bf56563d00, type: 3}
       propertyPath: _layersPerFrame
-      value: 40
+      value: 55
       objectReference: {fileID: 0}
     - target: {fileID: 3220547500283905716, guid: fdc1341c6728905408cd90bf56563d00, type: 3}
       propertyPath: _referenceCamera

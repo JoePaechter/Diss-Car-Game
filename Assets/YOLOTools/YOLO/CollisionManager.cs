@@ -83,7 +83,7 @@ namespace YOLOTools.YOLO
             float kartArea = kartRect.width * kartRect.height;
 
 
-            bool overlaps = overlap_area > kartArea * 0.25f;
+            bool overlaps = overlap_area > kartArea * 0.4f;
             //float kartArea = kartRect.width * kartRect.height;
 
             Debug.Log($"Kart:{kartRect} | car:{carRect}, overlaps:{overlaps}");

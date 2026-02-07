@@ -16,6 +16,19 @@ using YOLOTools.YOLO.ObjectDetection;
 
 public class BoundingBoxDisplayManager : MonoBehaviour
 {
+    [Header("interpolation variables")]
+    [SerializeField] private float interpolationRate = 20f;
+    [SerializeField] private float predictionStrength = 0.25f;
+    [SerializeField] private float newObjectThreshold = 300f;
+    [SerializeField] private float ObjectCoolDown = 0.5f;
+    [SerializeField] private float velocirty_smoothing = 0.4f;
+    [SerializeField] private int minFrames = 1;
+    [SerializeField] private float screenPadding = 50f;
+    
+
+    
+
+
     private float _depthFromCamera = 2.0f;
 
     #region External Data Management
@@ -34,44 +47,238 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         public TextMesh label;
     }
 
+    private class PredictedVisual
+    {
+
+        public BoundingBoxVisual Visual;
+        public Vector2 CurrentMin; //predicted min and max
+        public Vector2 CurrentMax;
+
+        public Vector2 RawMin; //raw yolo min and max
+        public Vector2 RawMax;
+        public Vector2 VelocityMin; // how fast the box is moving (lag)
+        public Vector2 VelocityMax;
+
+        public float LastSeenCaptureTime;
+        public float LastSeenRenderTime;
+
+        public DetectedObject lastObject;
+        public int FrameCount;
+    }
+
     //list of bounding boxes created, dont wanna throw them away, saves memory
-    private List<BoundingBoxVisual> box_list;
+    //private List<BoundingBoxVisual> box_list;
+    private List<PredictedVisual> predicted = new List<PredictedVisual>();
 
     private void Awake()
     {
-        box_list = new List<BoundingBoxVisual>();
+        //box_list = new List<BoundingBoxVisual>();
     }
 
-    public void DisplayModels(List<DetectedObject> objects, Camera referenceCamera)
+    public void DisplayModels(List<DetectedObject> objects, Camera referenceCamera, float captureTime)
     {
         Profiler.BeginSample("ObjectDisplayManager.DisplayModels");
 
         _camera = referenceCamera;
+        float now = Time.time;
 
-        EnsureListSize(objects.Count);
+        List<DetectedObject> unmatchedDetections = new List<DetectedObject>(objects);
+        HashSet<PredictedVisual> matchedObjects = new HashSet<PredictedVisual>();
 
-        //draw all boxes in list
-        for (int i = 0; i < box_list.Count; i++)
+        //match new detections
+        foreach (var predict in predicted)
         {
-            if (i < objects.Count)
+            float closest = float.MaxValue;
+            DetectedObject bestMatch = null;
+
+            foreach (DetectedObject obj in unmatchedDetections)
             {
-                DrawBox(objects[i],  box_list[i]);
-                box_list[i].line.gameObject.SetActive(true);
-                box_list[i].label.gameObject.SetActive(true);
+                float distance = Vector2.Distance(ImageToScreenCoordinates(obj.BoundingBox.center),
+                    (predict.CurrentMin + predict.CurrentMax) / 2f);
+
+                float sizeRatio = (obj.BoundingBox.width * obj.BoundingBox.height) /
+                    (Mathf.Abs(predict.RawMax.x - predict.RawMin.x) * Mathf.Abs(predict.RawMax.y - predict.RawMin.y));
+
+                if (distance < closest && distance < newObjectThreshold && sizeRatio > 0.5f && sizeRatio < 2.0f)
+                {
+                    closest = distance;
+                    bestMatch = obj;
+                }
             }
-            else
+
+            if (bestMatch != null)
             {
-                box_list[i].line.gameObject.SetActive(false);
-                box_list[i].label.gameObject.SetActive(false);
+                UpdatePrediction(predict, bestMatch, captureTime);
+                matchedObjects.Add(predict);
+                unmatchedDetections.Remove(bestMatch);
+            }
+        }
+
+            //spawn boxes
+            foreach (var newDetection in unmatchedDetections)
+            {
+                predicted.Add(CreateNewPrediction(newDetection, captureTime));
 
             }
 
+            //destroy boxes
+            for (int i = predicted.Count - 1; i >= 0; i--)
+            {
+                if (!matchedObjects.Contains(predicted[i]) && (now - predicted[i].LastSeenRenderTime > ObjectCoolDown))
+                {
+                    Destroy(predicted[i].Visual.root);
+                    predicted.RemoveAt(i);
+                }
+            }
+            Profiler.EndSample();
+    }
+
+
+    /*EnsureListSize(objects.Count);
+
+    //draw all boxes in list
+    for (int i = 0; i < box_list.Count; i++)
+    {
+        if (i < objects.Count)
+        {
+            DrawBox(objects[i],  box_list[i]);
+            box_list[i].line.gameObject.SetActive(true);
+            box_list[i].label.gameObject.SetActive(true);
+        }
+        else
+        {
+            box_list[i].line.gameObject.SetActive(false);
+            box_list[i].label.gameObject.SetActive(false);
 
         }
-        Profiler.EndSample();
+
+
+    }
+    Profiler.EndSample();
+}
+*/
+
+
+    private void Update()
+    {
+        if (_camera == null)
+        {
+            return;
+        }
+        float now = Time.time;
+
+        foreach (var predict in predicted) 
+        {
+            if (IsOffScreen(predict.CurrentMin, predict.CurrentMax))
+            {
+                predict.Visual.root.SetActive(false);
+            }
+            float latency = now - predict.LastSeenCaptureTime;
+
+            Vector2 predMin = predict.RawMin + (predict.VelocityMin * latency * predictionStrength);
+            Vector2 predMax = predict.RawMax + (predict.VelocityMax *latency * predictionStrength);
+
+            // interpolate
+
+            predict.CurrentMin = Vector2.Lerp(predict.CurrentMin, predMin, Time.deltaTime * interpolationRate);
+            predict.CurrentMax = Vector2.Lerp(predict.CurrentMax, predMax, Time.deltaTime * interpolationRate);
+
+            if (predict.FrameCount >= minFrames)
+            {
+               //DrawPredictedBox(predict);
+            }
+        }
+    }
+
+    private bool IsOffScreen(Vector2 min, Vector2 max)
+    {
+        return max.x < -screenPadding || min.x > _camera.scaledPixelWidth + screenPadding || max.y < -screenPadding || min.y > _camera.scaledPixelHeight + screenPadding;
+
+    }
+
+    private void UpdatePrediction(PredictedVisual predict, DetectedObject newObj, float captureTime)
+    {
+        Vector2 newMin = ImageToScreenCoordinates(newObj.BoundingBox.min);
+        Vector2 newMax = ImageToScreenCoordinates(newObj.BoundingBox.max);
+        float dt = captureTime - predict.LastSeenCaptureTime;
+
+        if (dt > 0.001f)
+        {
+            Vector2 rawVelMin = (newMin - predict.RawMin) / dt;
+            Vector2 rawVelMax = (newMax - predict.RawMax) / dt;
+
+            predict.VelocityMin = Vector2.Lerp(predict.VelocityMin, rawVelMin, velocirty_smoothing);
+            predict.VelocityMax = Vector2.Lerp(predict.VelocityMax, rawVelMax, velocirty_smoothing);
+        }
+
+        predict.RawMin = newMin;
+        predict.RawMax = newMax;
+        predict.lastObject = newObj;
+        predict.LastSeenCaptureTime = captureTime;
+        predict.LastSeenRenderTime = Time.time;
+
+        predict.FrameCount++;
+        if (predict.FrameCount >= minFrames)
+        {
+            predict.Visual.root.SetActive(true);
+        }
+    }
+
+    private PredictedVisual CreateNewPrediction(DetectedObject obj, float captureTime)
+    {
+        var visual = CreateVisual();
+        
+
+        Vector2 screenMin = ImageToScreenCoordinates(obj.BoundingBox.min);
+        Vector2 screenMax = ImageToScreenCoordinates(obj.BoundingBox.max);
+
+        int initialFrames = 1;
+
+        if (initialFrames >= minFrames)
+        {
+            visual.root.SetActive(true);
+        }
+        else
+        {
+            visual.root.SetActive(false);
+        }
+
+        return new PredictedVisual
+        {
+            Visual = visual,
+            CurrentMin = screenMin,
+            CurrentMax = screenMax,
+            RawMin = screenMin,
+            RawMax = screenMax,
+            LastSeenCaptureTime = captureTime,
+            LastSeenRenderTime = Time.time,
+            lastObject = obj,
+            FrameCount = initialFrames
+        };
+    }
+
+    private void DrawPredictedBox(PredictedVisual predict)
+    {
+        Vector3[] corners = new Vector3[5];
+
+        corners[0] = ScreenToWorld(predict.CurrentMin.x, predict.CurrentMin.y);
+        corners[1] = ScreenToWorld(predict.CurrentMax.x, predict.CurrentMin.y);
+        corners[2] = ScreenToWorld(predict.CurrentMax.x, predict.CurrentMax.y);
+        corners[3] = ScreenToWorld(predict.CurrentMin.x, predict.CurrentMax.y);
+        corners[4] = corners[0];
+
+        predict.Visual.line.positionCount = corners.Length;
+        predict.Visual.line.SetPositions(corners);
+
+        predict.Visual.label.text = $"{predict.lastObject.CocoName} {(predict.lastObject.Confidence * 100f): 0}%";
+        predict.Visual.label.transform.position = ScreenToWorld(predict.CurrentMin.x, predict.CurrentMax.y + 10f);
+        
+        predict.Visual.label.transform.LookAt(predict.Visual.label.transform.position + _camera.transform.rotation * Vector3.forward,
+                                _camera.transform.rotation * Vector3.up);
     }
 
     #region Model Methods
+    /*
     private void  EnsureListSize(int size)
     {
         if (box_list == null)
@@ -81,7 +288,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         {
             box_list.Add(CreateVisual());
         }
-    }
+    }*/
 
     private BoundingBoxVisual CreateVisual()
     {
@@ -109,7 +316,11 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         label.characterSize = 0.01f;
         label.anchor = TextAnchor.LowerLeft;
         label.color = Color.white;
-        
+
+        //hide lines remove to see bounding boxes
+        line.enabled = false;              
+        label.gameObject.SetActive(false);
+
 
         root.SetActive(false);
 
@@ -171,12 +382,16 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
     public void ClearModels()
     {
-        foreach (var visual in box_list)
+        foreach (var p in predicted)
         {
-            visual.line.gameObject.SetActive(false); 
-            visual.label.gameObject.SetActive(false);   
+            if(p.Visual.root != null)
+            {
+                Destroy(p.Visual.root);
+            }
+            
         }
-        
+        predicted.Clear();
+
     }
 
 
@@ -222,15 +437,21 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
     public Rect GetCarRect(DetectedObject obj)
     {
-        Vector2 a = ImageToScreenForCollision(obj.BoundingBox.min);
-        Vector2 b = ImageToScreenForCollision(obj.BoundingBox.max);
+        var predict = predicted.FirstOrDefault(p => p.lastObject == obj);
 
-        float xMin = Mathf.Min(a.x, b.x);
-        float xMax = Mathf.Max(a.x, b.x);
-        float yMin = Mathf.Min(a.y, b.y);
-        float yMax = Mathf.Max(a.y, b.y);
-
-        return Rect.MinMaxRect(xMin, yMin, xMax, yMax);
+        Vector2 min, max;
+        if(predict != null)
+        {
+            min = predict.CurrentMin;
+            max = predict.CurrentMax;
+        }
+        else
+        {
+            min = ImageToScreenForCollision(obj.BoundingBox.min);
+            max = ImageToScreenForCollision(obj.BoundingBox.max);
+        }
+        return Rect.MinMaxRect(Mathf.Min(min.x, max.x), Mathf.Min(min.y, max.y),
+            Mathf.Max(min.x, max.x), Mathf.Max(min.y,max.y));   
     }
 
     #endregion

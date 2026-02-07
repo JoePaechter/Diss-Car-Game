@@ -76,6 +76,7 @@ namespace YOLOTools.YOLO
 
         private List<DetectedObject> _pendingDetections;
         private bool _hasPendingDetections;
+        private float _currentTime; //time stamps for when object was detected
         public IReadOnlyList<DetectedObject> CurrentDetections => _pendingDetections;
 
 
@@ -142,11 +143,10 @@ namespace YOLOTools.YOLO
             if (_hasPendingDetections)
             {
                 _hasPendingDetections = false;
-
               
                 Debug.Log($"YOLO detections count: {_pendingDetections?.Count ?? 0}");
 
-                _displayManager.DisplayModels(_pendingDetections, ReferenceCamera);
+                _displayManager.DisplayModels(_pendingDetections, ReferenceCamera, _currentTime);
 
                 if (_collisionManager != null)
                 {
@@ -169,6 +169,7 @@ namespace YOLOTools.YOLO
                     Profiler.BeginSample("YOLOHandler.Setup");
 
                     if ((_inputTexture = YOLOCamera.GetTexture()) == null) return;
+                    _currentTime = Time.time;
                     splitInferenceEnumerator = _inferenceHandler.RunWithLayerControl(_inputTexture);
                     inferencePending = true;
                     _analysisCamera.CopyFrom(ReferenceCamera);
@@ -206,7 +207,10 @@ namespace YOLOTools.YOLO
 
                             // Store results for main-thread Update()
                         _pendingDetections = detectedObjects.FindAll(d => _allowedClassIds.Contains(d.CocoClass) && notTooBig(d));
-                        _hasPendingDetections = true;
+                            if (_pendingDetections != null)
+                            {
+                                _hasPendingDetections = true;
+                            }
 
                         analysisResultTensor?.Dispose();
                         analysisResultTensor = null;
