@@ -1,6 +1,8 @@
 using Oculus.Interaction;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.XR;
 using YOLOTools.YOLO;
 
 public class kart : MonoBehaviour, CollisionResponderInterface
@@ -38,6 +40,11 @@ public class kart : MonoBehaviour, CollisionResponderInterface
     private SpeedController speed;
 
     private MagnetController magnet;
+
+    //crash haptics
+
+    public float haptic_amplitude;
+    public float haptic_duration;
 
 
 
@@ -244,6 +251,7 @@ public class kart : MonoBehaviour, CollisionResponderInterface
             OnCarHit();
             if (kartMaterial == null) return;
             kartMaterial.color = crashColor;
+            playLeftHaptic(haptic_amplitude, haptic_duration);
             gameManager.endGame();
         }
 
@@ -301,5 +309,20 @@ public class kart : MonoBehaviour, CollisionResponderInterface
             kartMaterial.color = originalColor;
         }
 
+    }
+
+    public void playLeftHaptic(float amplitude, float duration)
+    {
+        var devices = new List<UnityEngine.XR.InputDevice>();
+        InputDevices.GetDevicesWithCharacteristics(
+            InputDeviceCharacteristics.Left | InputDeviceCharacteristics.Controller, devices);
+
+        foreach (UnityEngine.XR.InputDevice device in devices)
+        {
+            if (device.TryGetHapticCapabilities(out HapticCapabilities controller) && controller.supportsImpulse)
+            {
+                device.SendHapticImpulse(0, haptic_amplitude, haptic_duration);
+            }
+        }
     }
 }

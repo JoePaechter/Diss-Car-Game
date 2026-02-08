@@ -1636,6 +1636,8 @@ MonoBehaviour:
   screenPadding: 50
   XSprite: {fileID: 1296376464}
   magnet: {fileID: 1230243601}
+  inv: {fileID: 0}
+  trafficLightOnScreen: 0
   _videoFeedManager: {fileID: 954090023}
 --- !u!1 &1095802685
 GameObject:
@@ -1906,9 +1908,14 @@ MonoBehaviour:
   currentX: 0.5
   kartRenderer: {fileID: 1241364537}
   crashColor: {r: 1, g: 0, b: 0, a: 1}
+  magnetColor: {r: 0, g: 1, b: 0, a: 1}
+  invColor: {r: 1, g: 0.8431373, b: 0, a: 1}
+  speedColor: {r: 0.627451, g: 0.1254902, b: 0.9411765, a: 1}
   startPosition: {x: 0, y: 0, z: 0}
   startRotation: {x: 0, y: 0, z: 0, w: 0}
   gameManager: {fileID: 702611433}
+  haptic_amplitude: 1
+  haptic_duration: 1.5
 --- !u!65 &1230243599
 BoxCollider:
   m_ObjectHideFlags: 0

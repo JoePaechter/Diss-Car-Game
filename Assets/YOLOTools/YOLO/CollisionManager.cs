@@ -12,6 +12,7 @@ namespace YOLOTools.YOLO
         [SerializeField] private MonoBehaviour responderBehaviour;
         private CollisionResponderInterface responder;
         [SerializeField] private BoundingBoxDisplayManager boxDisplay;
+        
 
 
 

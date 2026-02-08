@@ -129,7 +129,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3af30affbabec46439c4276d0a58fae0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoinMovement
-  speed: 3
+  startSpeed: 3
+  newSpeed: 0
   magnet_speed: 10
   kart: {fileID: 0}
   track: {fileID: 0}
@@ -146,8 +147,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoinPickup
   coin_pickup_sound: {fileID: 2773111937576641299}
-  haptic_amplitude: 0.7
-  haptic_duration: 0.12
+  haptic_amplitude: 0.8
+  haptic_duration: 0.2
   scoreAmount: 1
   coinSpawner: {fileID: 0}
 --- !u!82 &2773111937576641299
