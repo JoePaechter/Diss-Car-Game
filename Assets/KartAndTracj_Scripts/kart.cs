@@ -22,6 +22,9 @@ public class kart : MonoBehaviour, CollisionResponderInterface
     public Renderer kartRenderer;
 
     public Color crashColor = Color.red;
+    public Color magnetColor = Color.green;
+    public Color invColor = Color.gold;
+    public Color speedColor = Color.purple;
     private Color originalColor;
     private Material kartMaterial;
 
@@ -33,6 +36,8 @@ public class kart : MonoBehaviour, CollisionResponderInterface
     private InvincibilityController inv;
 
     private SpeedController speed;
+
+    private MagnetController magnet;
 
 
 
@@ -59,6 +64,8 @@ public class kart : MonoBehaviour, CollisionResponderInterface
         inv = GetComponent<InvincibilityController>();
 
         speed = GetComponent<SpeedController>();
+
+        magnet = GetComponent<MagnetController>();
 
 
 
@@ -89,6 +96,9 @@ public class kart : MonoBehaviour, CollisionResponderInterface
 
         transform.localRotation = Quaternion.identity;
         IsSpeedpowerUp();
+        IsMagnet();
+        IsInv();
+        IsNothing();
         HandleMovement();
     }
 
@@ -257,10 +267,39 @@ public class kart : MonoBehaviour, CollisionResponderInterface
         if (speed.SpeedOn)
         {
             steer_speed = 3f;
+            kartMaterial.color = speedColor;
         }
         else
         {
             steer_speed = 2f;
+            
         }
+    }
+
+    public void IsInv()
+    {
+        if (inv.InvOn)
+        {
+            kartMaterial.color = invColor;
+        }
+        
+    }
+
+    public void IsMagnet()
+    {
+        if (magnet.MagnetOn)
+        {
+            kartMaterial.color = magnetColor;
+        }
+        
+    }
+
+    public void IsNothing()
+    {
+        if (!magnet.MagnetOn && !inv.InvOn && !speed.SpeedOn)
+        {
+            kartMaterial.color = originalColor;
+        }
+
     }
 }
