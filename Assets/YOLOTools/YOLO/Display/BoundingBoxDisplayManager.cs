@@ -12,6 +12,8 @@ using UnityEngine.Profiling;
 using YOLOTools.ObjectDetection;
 using YOLOTools.Utilities;
 using YOLOTools.YOLO.ObjectDetection;
+using UnityEngine.UI;
+using UnityEngine.XR;
 
 
 public class BoundingBoxDisplayManager : MonoBehaviour
@@ -24,9 +26,21 @@ public class BoundingBoxDisplayManager : MonoBehaviour
     [SerializeField] private float velocirty_smoothing = 0.4f;
     [SerializeField] private int minFrames = 1;
     [SerializeField] private float screenPadding = 50f;
-    
 
-    
+    public Image XSprite;
+    public MagnetController magnet;
+
+    public InvincibilityController inv;
+
+
+    public bool trafficLightOnScreen;
+
+    private bool XbuttonPressed = false;
+
+
+
+
+
 
 
     private float _depthFromCamera = 2.0f;
@@ -64,6 +78,10 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
         public DetectedObject lastObject;
         public int FrameCount;
+
+        
+
+
     }
 
     //list of bounding boxes created, dont wanna throw them away, saves memory
@@ -73,6 +91,10 @@ public class BoundingBoxDisplayManager : MonoBehaviour
     private void Awake()
     {
         //box_list = new List<BoundingBoxVisual>();
+        magnet = FindFirstObjectByType<MagnetController>();
+        inv = FindFirstObjectByType<InvincibilityController>();
+        trafficLightOnScreen = false;
+
     }
 
     public void DisplayModels(List<DetectedObject> objects, Camera referenceCamera, float captureTime)
@@ -93,6 +115,14 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
             foreach (DetectedObject obj in unmatchedDetections)
             {
+                // check to see if thing is bus
+                if (obj.CocoName == "bus" || obj.CocoName == "laptop")
+                {
+                    magnet.TurnOnMagnet();
+                    Debug.Log("Magnet on");
+                }
+
+
                 float distance = Vector2.Distance(ImageToScreenCoordinates(obj.BoundingBox.center),
                     (predict.CurrentMin + predict.CurrentMax) / 2f);
 
@@ -121,15 +151,25 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
             }
 
+        bool currentTrafficLight = false;
+
             //destroy boxes
             for (int i = predicted.Count - 1; i >= 0; i--)
             {
+            if (predicted[i].lastObject.CocoName == "traffic light" || predicted[i].lastObject.CocoName == "laptop")
+            {
+                currentTrafficLight = true;
+            }
                 if (!matchedObjects.Contains(predicted[i]) && (now - predicted[i].LastSeenRenderTime > ObjectCoolDown))
                 {
                     Destroy(predicted[i].Visual.root);
                     predicted.RemoveAt(i);
                 }
             }
+        if (!currentTrafficLight) 
+        {
+            trafficLightOnScreen = false;
+        }
             Profiler.EndSample();
     }
 
@@ -167,6 +207,8 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         }
         float now = Time.time;
 
+        trafficLightOnScreen = false;
+
         foreach (var predict in predicted) 
         {
             if (IsOffScreen(predict.CurrentMin, predict.CurrentMax))
@@ -185,9 +227,19 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
             if (predict.FrameCount >= minFrames)
             {
+                if(predict.lastObject.CocoName == "traffic light" || predict.lastObject.CocoName == "laptop")
+                {
+                    trafficLightOnScreen = true;
+                    //SpriteFill(predict.CurrentMin.x, predict.CurrentMin.y, predict.CurrentMax.x - predict.CurrentMin.x, predict.CurrentMax.y - predict.CurrentMin.y);
+                    //XSprite.enabled = true;
+                    DrawPredictedBox(predict);
+                }
                //DrawPredictedBox(predict);
             }
         }
+        checkForButton();
+
+        
     }
 
     private bool IsOffScreen(Vector2 min, Vector2 max)
@@ -268,10 +320,15 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         corners[4] = corners[0];
 
         predict.Visual.line.positionCount = corners.Length;
+        if (trafficLightOnScreen)
+        {
+            predict.Visual.line.material.color = Color.red;
+        }
         predict.Visual.line.SetPositions(corners);
 
         predict.Visual.label.text = $"{predict.lastObject.CocoName} {(predict.lastObject.Confidence * 100f): 0}%";
         predict.Visual.label.transform.position = ScreenToWorld(predict.CurrentMin.x, predict.CurrentMax.y + 10f);
+
         
         predict.Visual.label.transform.LookAt(predict.Visual.label.transform.position + _camera.transform.rotation * Vector3.forward,
                                 _camera.transform.rotation * Vector3.up);
@@ -318,8 +375,8 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         label.color = Color.white;
 
         //hide lines remove to see bounding boxes
-        line.enabled = false;              
-        label.gameObject.SetActive(false);
+        //line.enabled = false;              
+        //label.gameObject.SetActive(false);
 
 
         root.SetActive(false);
@@ -454,6 +511,47 @@ public class BoundingBoxDisplayManager : MonoBehaviour
             Mathf.Max(min.x, max.x), Mathf.Max(min.y,max.y));   
     }
 
+    public void SpriteFill(float x, float y, float width, float height)
+    {
+        RectTransform rt = XSprite.GetComponent<RectTransform>();
+
+        rt.sizeDelta = new Vector2(width, height);
+
+        Vector2 positon = new Vector2(x + width * 0.5f,  y + height * 0.5f);
+
+        RectTransform canvasRT = XSprite.canvas.GetComponent<RectTransform>();
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRT, positon, null, out Vector2 anchorposition);
+
+        rt.position = anchorposition;
+
+        
+    }
+
+    public void checkForButton()
+    {
+        if (!trafficLightOnScreen)
+        {
+            return;
+        }
+        InputDevice leftController = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+
+
+        if (leftController.TryGetFeatureValue(CommonUsages.primaryButton, out bool pressed))
+        {
+            if (pressed && !XbuttonPressed) {
+                inv.TurnOnInv();
+                Debug.Log("inv on!");
+                XbuttonPressed = true;
+            }
+
+            XbuttonPressed = pressed;
+        }
+        
+           
+        
+    }
     #endregion
 }
 
+ 

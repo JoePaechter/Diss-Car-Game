@@ -10,7 +10,7 @@ public class MagnetPickup : MonoBehaviour
             MagnetController magnet = other.GetComponent<MagnetController>();
             if (magnet != null)
             {
-                magnet.TurnOnMagnet();
+                //magnet.TurnOnMagnet();
             }
 
             Destroy(gameObject);
