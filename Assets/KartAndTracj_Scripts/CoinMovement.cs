@@ -3,16 +3,19 @@ using UnityEngine;
 public class CoinMovement : MonoBehaviour
 {
 
-    public float speed = 3f;
+    public float startSpeed = 3f;
+    public float newSpeed;
     public float magnet_speed = 5f;
     public Transform kart;
     public Transform track;
     private MagnetController magnet;
+    private ScoreTracker scoreTracker;
     
 
     private void Start()
     {
         magnet = kart.GetComponent<MagnetController>();
+        scoreTracker = FindObjectOfType<ScoreTracker>();
     }
     // Update is called once per frame
     void Update()
@@ -31,7 +34,8 @@ public class CoinMovement : MonoBehaviour
                 return;
             }
         }
-        transform.position -= track.forward * speed * Time.deltaTime;
+        newSpeed = startSpeed + (0.1f * scoreTracker.score);
+        transform.position -= track.forward * newSpeed * Time.deltaTime;
         
     }
 
