@@ -28,9 +28,12 @@ public class BoundingBoxDisplayManager : MonoBehaviour
     [SerializeField] private float screenPadding = 50f;
 
     public Image XSprite;
-    public MagnetController magnet;
 
+   
     public InvincibilityController inv;
+    public SpeedController speed;
+
+
 
 
     public bool trafficLightOnScreen;
@@ -91,7 +94,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
     private void Awake()
     {
         //box_list = new List<BoundingBoxVisual>();
-        magnet = FindFirstObjectByType<MagnetController>();
+        speed = FindFirstObjectByType<SpeedController>();
         inv = FindFirstObjectByType<InvincibilityController>();
         trafficLightOnScreen = false;
 
@@ -118,8 +121,8 @@ public class BoundingBoxDisplayManager : MonoBehaviour
                 // check to see if thing is bus
                 if (obj.CocoName == "bus" || obj.CocoName == "laptop")
                 {
-                    magnet.TurnOnMagnet();
-                    Debug.Log("Magnet on");
+                    speed.TurnOnSpeed();
+                    Debug.Log("Speed on");
                 }
 
 
@@ -232,7 +235,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
                     trafficLightOnScreen = true;
                     //SpriteFill(predict.CurrentMin.x, predict.CurrentMin.y, predict.CurrentMax.x - predict.CurrentMin.x, predict.CurrentMax.y - predict.CurrentMin.y);
                     //XSprite.enabled = true;
-                    DrawPredictedBox(predict);
+                    DrawPridictedCross(predict);
                 }
                //DrawPredictedBox(predict);
             }
@@ -332,6 +335,43 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         
         predict.Visual.label.transform.LookAt(predict.Visual.label.transform.position + _camera.transform.rotation * Vector3.forward,
                                 _camera.transform.rotation * Vector3.up);
+    }
+
+    private void DrawPridictedCross(PredictedVisual predict)
+    {
+        Vector3[] corners = new Vector3[4];
+        corners[0] = ScreenToWorld(predict.CurrentMin.x, predict.CurrentMin.y);
+        corners[1] = ScreenToWorld(predict.CurrentMax.x, predict.CurrentMin.y);
+        corners[2] = ScreenToWorld(predict.CurrentMax.x, predict.CurrentMax.y);
+        corners[3] = ScreenToWorld(predict.CurrentMin.x, predict.CurrentMax.y);
+
+        predict.Visual.line.positionCount = 11;
+        predict.Visual.line.material.color = Color.red;
+
+        predict.Visual.line.SetPosition(0, corners[0]);
+        predict.Visual.line.SetPosition(1, corners[1]);
+        predict.Visual.line.SetPosition(2, corners[2]);
+        predict.Visual.line.SetPosition(3, corners[3]);
+        predict.Visual.line.SetPosition(4, corners[0]);
+
+        predict.Visual.line.SetPosition(5, corners[0]);
+
+        predict.Visual.line.SetPosition(6, corners[0]);
+        predict.Visual.line.SetPosition(7, corners[2]);
+
+        predict.Visual.line.SetPosition(8, corners[2]);
+
+        predict.Visual.line.SetPosition(9, corners[1]);
+        predict.Visual.line.SetPosition(10, corners[3]);
+
+
+
+
+
+        predict.Visual.label.transform.LookAt(predict.Visual.label.transform.position + _camera.transform.rotation * Vector3.forward,
+                                _camera.transform.rotation * Vector3.up);
+
+
     }
 
     #region Model Methods
@@ -544,6 +584,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
                 Debug.Log("inv on!");
                 XbuttonPressed = true;
             }
+            }
 
             XbuttonPressed = pressed;
         }
@@ -552,6 +593,6 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         
     }
     #endregion
-}
+
 
  

@@ -4,13 +4,28 @@ using System.Collections;
 public class SpeedController : MonoBehaviour
 {
     public float SpeedDuration = 10f;
+    public float SpeedCooldown = 20f;
+    public float SpeedTimer = 20f;
 
     public bool SpeedOn { get; private set; }
 
+    public void Update()
+    {
+        SpeedTimer += Time.deltaTime;
+
+    }
+
     public void TurnOnSpeed()
     {
-        StopAllCoroutines();
-        StartCoroutine(SpeedRoutine());
+        if (SpeedTimer >= SpeedDuration)
+        {
+            SpeedTimer = 0;
+            StopAllCoroutines();
+            StartCoroutine(SpeedRoutine());
+            SpeedTimer = 0;
+
+        }
+
     }
 
     IEnumerator SpeedRoutine()
@@ -18,5 +33,6 @@ public class SpeedController : MonoBehaviour
         SpeedOn = true;
         yield return new WaitForSecondsRealtime(SpeedDuration);
         SpeedOn = false;
+        
     }
 }

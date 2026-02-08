@@ -10,7 +10,7 @@ public class SpeedPickup : MonoBehaviour
             SpeedController speed = other.GetComponent<SpeedController>();
             if (speed != null)
             {
-                speed.TurnOnSpeed();
+                //speed.TurnOnSpeed();
             }
 
             Destroy(gameObject);
