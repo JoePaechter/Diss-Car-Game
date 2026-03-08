@@ -7,8 +7,9 @@ using YOLOTools.YOLO;
 
 public class kart : MonoBehaviour, CollisionResponderInterface
 {
-    public float steer_speed = 2.0f;
+    public float steer_speed = 1.5f;
     public float maxOffset_x = 2.2f;
+    public float deadZone = 0.08f;
 
 
  
@@ -46,11 +47,8 @@ public class kart : MonoBehaviour, CollisionResponderInterface
     public float haptic_amplitude;
     public float haptic_duration;
 
-
-
-
-
-
+    //crash sound
+    public AudioSource carCrashSound;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -114,6 +112,13 @@ public class kart : MonoBehaviour, CollisionResponderInterface
         float steer_input_x = steerActionX.ReadValue<float>();
        
 
+        if (Mathf.Abs(steer_input_x) < deadZone)
+        {
+            steer_input_x = 0f;
+        }
+
+        //raise to power 2 for more dramatic dynamic steering
+        steer_input_x = Mathf.Sign(steer_input_x) * Mathf.Pow(Mathf.Abs(steer_input_x), 2f);
 
         currentX += steer_input_x * steer_speed * Time.deltaTime;
 
@@ -251,6 +256,7 @@ public class kart : MonoBehaviour, CollisionResponderInterface
             OnCarHit();
             if (kartMaterial == null) return;
             kartMaterial.color = crashColor;
+            SoundTracker.Instance.PlayCarCrash();
             playLeftHaptic(haptic_amplitude, haptic_duration);
             gameManager.endGame();
         }

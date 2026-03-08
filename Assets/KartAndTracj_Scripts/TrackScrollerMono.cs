@@ -1,4 +1,6 @@
+using NUnit;
 using UnityEngine;
+using UnityEngine.XR;
 
 public class TrackScrollerMono : MonoBehaviour
 {
@@ -26,6 +28,9 @@ public class TrackScrollerMono : MonoBehaviour
     private bool isTurning = false;
     Quaternion targetRotation;
 
+    private bool triggerButtonPressed = false;
+    private bool triggerButtonHeld = false;
+
 
 
 
@@ -45,6 +50,8 @@ public class TrackScrollerMono : MonoBehaviour
 
     private void LateUpdate()
     {
+        
+        checkForTrigger();
         ApplyHeadTracking();
         Vector3 forward = transform.forward;
         forward.y = 0f;
@@ -101,11 +108,13 @@ public class TrackScrollerMono : MonoBehaviour
 
 
 
-        if (Mathf.Abs(angle) > turnThreshold && !isTurning)
+        if ((Mathf.Abs(angle) > turnThreshold && !isTurning) || triggerButtonPressed)
         {
             isTurning = true;
             targetRotation =
                 Quaternion.LookRotation(smoothedHeadDir, Vector3.up);
+
+           
         }
 
         if (isTurning || Mathf.Abs(angle) > turnThreshold)
@@ -123,6 +132,29 @@ public class TrackScrollerMono : MonoBehaviour
         {
             isTurning = false;
         }
+    }
+
+
+    public void checkForTrigger()
+    {
+        
+        InputDevice leftController = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+
+
+        if (leftController.TryGetFeatureValue(CommonUsages.triggerButton, out bool pressed))
+        {
+            if (pressed && !triggerButtonPressed)
+            {
+                
+                triggerButtonPressed = true;
+            }
+            else
+            {
+                triggerButtonPressed = false;
+            }
+        }
+
+        triggerButtonHeld = pressed;
     }
 
 

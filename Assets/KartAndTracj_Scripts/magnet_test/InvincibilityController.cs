@@ -4,9 +4,9 @@ using System.Collections;
 public class InvincibilityController : MonoBehaviour
 {
     
-    public float InvDuration = 4f;
-    public float InvCooldown = 20f;
-    public float InvTimer = 20f;
+    public float InvDuration = 10f;
+    public float InvCooldown = 10f;
+    public float InvTimer = 10f;
 
     public bool InvOn { get; private set; }
 
@@ -30,7 +30,13 @@ public class InvincibilityController : MonoBehaviour
     IEnumerator InvRoutine()
     {
         InvOn = true;
+        SoundTracker.Instance.PlayInv();
         yield return new WaitForSecondsRealtime(InvDuration);
         InvOn = false;
+    }
+
+    public void playBusSound()
+    {
+        SoundTracker.Instance.PlayBusDetected();
     }
 }

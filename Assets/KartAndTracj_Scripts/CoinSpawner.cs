@@ -75,13 +75,13 @@ public class CoinSpawner : MonoBehaviour
 
         if (InvTimer > InvInterval)
         {
-            SpawnInv();
+            //SpawnInv();
             InvTimer = 0f;
         }
 
         if (SpeedTimer > SpeedInterval)
         {
-            SpawnSpeed();
+            //SpawnSpeed();
             SpeedTimer = 0f;
         }
     }

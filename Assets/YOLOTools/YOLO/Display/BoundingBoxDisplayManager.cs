@@ -26,6 +26,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
     [SerializeField] private float velocirty_smoothing = 0.4f;
     [SerializeField] private int minFrames = 1;
     [SerializeField] private float screenPadding = 50f;
+    
 
     public Image XSprite;
 
@@ -34,12 +35,22 @@ public class BoundingBoxDisplayManager : MonoBehaviour
     public SpeedController speed;
 
 
+    [SerializeField] private Camera uiCamera;
+    public RectTransform canvasRect;
+    public RectTransform shieldRect;
+    public UnityEngine.UI.Image shieldImage;
+
+
+
 
 
     public bool trafficLightOnScreen;
 
-    private bool XbuttonPressed = false;
 
+    [SerializeField] private float BusPowerUpWindow = 10f;
+    private float BusPowerUpTimer = 10f;
+    private bool XbuttonPressed = false;
+    private LineRenderer border;
 
 
 
@@ -96,6 +107,33 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         //box_list = new List<BoundingBoxVisual>();
         speed = FindFirstObjectByType<SpeedController>();
         inv = FindFirstObjectByType<InvincibilityController>();
+
+
+        //temp
+        /*shieldRect.anchorMin = new Vector2(0.5f, 0.5f);
+        shieldRect.anchorMax = new Vector2(0.5f, 0.5f);
+        shieldRect.pivot = new Vector2(0.5f, 0.5f);
+        shieldRect.localScale = Vector3.one;
+        shieldRect.anchoredPosition = Vector2.zero;
+        shieldRect.sizeDelta = new Vector2(300, 300);
+
+        shieldRect.gameObject.SetActive(false);
+        shieldImage.enabled = false;*/
+
+        
+        //create frame
+        GameObject borderObject = new GameObject("Border");
+        borderObject.transform.SetParent(transform);
+        border = borderObject.AddComponent<LineRenderer>();
+        border.useWorldSpace = true;
+        border.loop = true;
+        border.material = new Material(Shader.Find("Unlit/Color"));
+        border.material.color = Color.red;
+        border.startWidth = 0.5f;
+        border.endWidth = 0.5f;
+        border.positionCount = 4;
+        border.enabled = false;
+
         trafficLightOnScreen = false;
 
     }
@@ -119,7 +157,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
             foreach (DetectedObject obj in unmatchedDetections)
             {
                 // check to see if thing is bus
-                if (obj.CocoName == "bus" || obj.CocoName == "laptop")
+                if (obj.CocoName == "bicycle" )
                 {
                     speed.TurnOnSpeed();
                     Debug.Log("Speed on");
@@ -159,7 +197,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
             //destroy boxes
             for (int i = predicted.Count - 1; i >= 0; i--)
             {
-            if (predicted[i].lastObject.CocoName == "traffic light" || predicted[i].lastObject.CocoName == "laptop")
+            if (predicted[i].lastObject.CocoName == "traffic light" || predicted[i].lastObject.CocoName == "stop sign" || predicted[i].lastObject.CocoName == "bus" || predicted[i].lastObject.CocoName == "laptop")
             {
                 currentTrafficLight = true;
             }
@@ -211,6 +249,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         float now = Time.time;
 
         trafficLightOnScreen = false;
+        BusPowerUpTimer += Time.deltaTime;
 
         foreach (var predict in predicted) 
         {
@@ -230,12 +269,15 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
             if (predict.FrameCount >= minFrames)
             {
-                if(predict.lastObject.CocoName == "traffic light" || predict.lastObject.CocoName == "laptop")
+                if(predict.lastObject.CocoName == "traffic light" || predict.lastObject.CocoName == "stop sign" || predict.lastObject.CocoName == "bus" || predict.lastObject.CocoName == "laptop")
                 {
                     trafficLightOnScreen = true;
                     //SpriteFill(predict.CurrentMin.x, predict.CurrentMin.y, predict.CurrentMax.x - predict.CurrentMin.x, predict.CurrentMax.y - predict.CurrentMin.y);
                     //XSprite.enabled = true;
+                    //PLAY SOUND HERE
+                    //inv.playBusSound();
                     DrawPridictedCross(predict);
+                    DrawBorderFrame();
                 }
                //DrawPredictedBox(predict);
             }
@@ -298,6 +340,17 @@ public class BoundingBoxDisplayManager : MonoBehaviour
             visual.root.SetActive(false);
         }
 
+        //warn player of bus
+
+        if (obj.CocoName == "bus"|| obj.CocoName == "laptop")
+        {
+            if (BusPowerUpTimer >= BusPowerUpWindow)
+            {
+                inv.playBusSound();
+                BusPowerUpTimer = 0f;
+            }
+        }
+
         return new PredictedVisual
         {
             Visual = visual,
@@ -310,6 +363,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
             lastObject = obj,
             FrameCount = initialFrames
         };
+
     }
 
     private void DrawPredictedBox(PredictedVisual predict)
@@ -339,6 +393,9 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
     private void DrawPridictedCross(PredictedVisual predict)
     {
+        Debug.Log($"Drawing cross for {predict.lastObject.CocoName}");
+        //predict.Visual.line.enabled = true;
+
         Vector3[] corners = new Vector3[4];
         corners[0] = ScreenToWorld(predict.CurrentMin.x, predict.CurrentMin.y);
         corners[1] = ScreenToWorld(predict.CurrentMax.x, predict.CurrentMin.y);
@@ -373,6 +430,62 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
 
     }
+
+    private void DrawBorderFrame()
+    {
+
+        border.SetPosition(0, ScreenToWorld(1050,-60)); // bottom left
+        border.SetPosition(1, ScreenToWorld(_camera.scaledPixelWidth-1050, -60)); //bootom right
+        border.SetPosition(2, ScreenToWorld(_camera.scaledPixelWidth-1050, _camera.scaledPixelHeight-200)); // top right
+        border.SetPosition(3, ScreenToWorld(1050, _camera.scaledPixelHeight-200)); //top left
+        border.enabled = true;
+
+    }
+
+
+  
+
+    /*private void DrawPridictedCross(PredictedVisual predict)
+    {
+        if (shieldRect == null || shieldImage == null || uiCamera == null)
+            return;
+
+        Vector2 min = predict.CurrentMin;
+        Vector2 max = predict.CurrentMax;
+
+        float minX = Mathf.Min(min.x, max.x);
+        float maxX = Mathf.Max(min.x, max.x);
+        float minY = Mathf.Min(min.y, max.y);
+        float maxY = Mathf.Max(min.y, max.y);
+
+        Vector2 center = new Vector2((minX + maxX) * 0.5f, (minY + maxY) * 0.5f);
+        Vector2 size = new Vector2(maxX - minX, maxY - minY);
+
+        size.x = Mathf.Max(size.x, 40f);
+        size.y = Mathf.Max(size.y, 40f);
+
+        RectTransform parentRect = shieldRect.parent as RectTransform;
+        if (parentRect == null) return;
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, center, uiCamera, out Vector2 localPoint))
+        {
+            shieldRect.anchorMin = new Vector2(0.5f, 0.5f);
+            shieldRect.anchorMax = new Vector2(0.5f, 0.5f);
+            shieldRect.pivot = new Vector2(0.5f, 0.5f);
+
+            shieldRect.anchoredPosition = localPoint;
+            shieldRect.sizeDelta = size;
+            shieldRect.localScale = Vector3.one;
+
+            shieldRect.gameObject.SetActive(true);
+            shieldImage.enabled = true;
+            shieldImage.color = Color.white;
+            shieldRect.SetAsLastSibling();
+
+            Debug.Log($"screen center={center}, local={localPoint}, size={size}");
+        }
+    
+    }*/
 
     #region Model Methods
     /*
@@ -415,8 +528,8 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         label.color = Color.white;
 
         //hide lines remove to see bounding boxes
-        //line.enabled = false;              
-        //label.gameObject.SetActive(false);
+        line.enabled = false;              
+        label.gameObject.SetActive(false);
 
 
         root.SetActive(false);
@@ -512,6 +625,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         
         
         return new Vector2(newX, newY - 200f);
+        //return new Vector2(newX, newY);
 
     }
 
@@ -528,6 +642,8 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
 
 
+
+        //return new Vector2(x, y);
         return new Vector2(x, y - 200f);
 
     }
@@ -551,29 +667,25 @@ public class BoundingBoxDisplayManager : MonoBehaviour
             Mathf.Max(min.x, max.x), Mathf.Max(min.y,max.y));   
     }
 
-    public void SpriteFill(float x, float y, float width, float height)
-    {
-        RectTransform rt = XSprite.GetComponent<RectTransform>();
-
-        rt.sizeDelta = new Vector2(width, height);
-
-        Vector2 positon = new Vector2(x + width * 0.5f,  y + height * 0.5f);
-
-        RectTransform canvasRT = XSprite.canvas.GetComponent<RectTransform>();
-
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRT, positon, null, out Vector2 anchorposition);
-
-        rt.position = anchorposition;
-
-        
-    }
+    
+    
 
     public void checkForButton()
     {
         if (!trafficLightOnScreen)
         {
-            return;
+            //shieldImage.enabled = false;
+            //shieldRect.gameObject.SetActive(false);
+            border.enabled = false;
+           if  (BusPowerUpTimer > BusPowerUpWindow)
+            {
+                return;
+            }
+            
         }
+
+        
+
         InputDevice leftController = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
 
 
@@ -581,6 +693,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         {
             if (pressed && !XbuttonPressed) {
                 inv.TurnOnInv();
+                Debug.Log("inv on!");
                 Debug.Log("inv on!");
                 XbuttonPressed = true;
             }

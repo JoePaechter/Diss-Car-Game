@@ -31,6 +31,7 @@ namespace YOLOTools.YOLO
         [Tooltip("The threshold at which a detection is accepted.")]
         [MinValue(0), MaxValue(1)] [SerializeField] public float _confidenceThreshold = 0.5f;
         
+        
         [Tooltip("A JSON containing a mapping of class numbers to class names")]
         [MustBeAssigned] [SerializeField] private TextAsset _classJson;
         

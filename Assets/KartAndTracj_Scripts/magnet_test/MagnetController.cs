@@ -19,6 +19,7 @@ public class MagnetController : MonoBehaviour
     IEnumerator MagnetRoutine()
     {
         MagnetOn = true;
+        SoundTracker.Instance.PlayMagnet();
         yield return new WaitForSeconds(magnetDuration);
         MagnetOn = false;
     }
