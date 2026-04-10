@@ -5,8 +5,8 @@ Due to my assest files being too big to upload to moodle. I have stored them on 
 https://github.com/JoePaechter/Diss-Car-Game
 
 File structure:
-- All important game files can be found in Assets/KartAndTracj_Scripts with the exception of CollisionResponderInterface.cs and CollisionManager.cs which can be found
-in Assets/YOLOTools/YOLO
+- All important game files can be found in Assets/KartAndTracj_Scripts with the exception of CollisionResponderInterface.cs, CollisionManager.cs which can both be found
+in Assets/YOLOTools/YOLO and BoundingBoxDisplayManager.cs which can be found in Assets/YOLOTools/YOLO/Display/BoundingBoxDisplayManager.cs
 - The audio files used can be found in Assets/Kart_game_Audio
 - The 3D models can be found in Assets/Models
 
@@ -40,7 +40,7 @@ in Assets/YOLOTools/YOLO
 3. Build for Android from the Build Profile menu:
     - Select File > Build Profile
     - Select Android
-    - Ensure that the DissCarGame scence is selected in the Scene List
+    - Make sure that the DissCarGame scence is selected in the Scene List
     - Select Build
     - To Successfully Build you Must have a Meta Quest Three headset, in develepor mode, connected to your PC when you build the game
     - After a succesful build you can open the game on your headset, the file will be under unkown sources
