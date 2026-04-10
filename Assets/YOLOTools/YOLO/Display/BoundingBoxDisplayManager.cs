@@ -1,4 +1,6 @@
 
+//this code was heavily adapted from the ObjectDisplayManager file written by Matthew Lyon, it is licensed under the MIT licence
+// https://github.com/matthewlyon23/YOLOQuestUnity
 //commented out libararies im not using anymore
 //using AYellowpaper.SerializedCollections;
 //using Meta.XR;

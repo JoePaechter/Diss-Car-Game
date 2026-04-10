@@ -1,4 +1,5 @@
 // This code was written by Matthew Lyon, with slight alterations by me, it is used under the MIT lience
+// https://github.com/matthewlyon23/YOLOQuestUnity
 
 using MyBox;
 using Newtonsoft.Json;

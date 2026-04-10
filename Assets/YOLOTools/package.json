@@ -1,10 +1,10 @@
 {
-  "name": "com.matthewlyon23.yolotools",
+  "name": "com.joepaechter.disscargame",
   "version": "1.0.0",
-  "displayName": "YOLO Tools",
-  "description": "A YOLO toolkit for performing real-time YOLO object-detection in Unity.",
-  "documentationUrl": "https://github.com/matthewlyon23/YOLOQuestUnity",
-  "licensesUrl": "https://github.com/matthewlyon23/YOLOQuestUnity/blob/main/LICENSE",
+  "displayName": "AR Car Game",
+  "description": "An immersive AR car game for car passengers",
+  "documentationUrl": "https://github.com/JoePaechter/Diss-Car-Game",
+  "licensesUrl": "https://github.com/JoePaechter/Diss-Car-Game/blob/main/LICENSE",
   "dependencies": {
     "com.meta.xr.sdk.all": "77.0.0",
     "com.unity.nuget.newtonsoft-json": "3.2.1",
@@ -19,9 +19,7 @@
     "object detection"
   ],
   "author": {
-    "name": "Matthew Lyon",
-    "email": "lyonmatthew2003@hotmail.com",
-    "url": "https://www.matthewlyon.co.uk"
+    "name": "Joe Paechter"
   }
 }
 
