@@ -116,57 +116,7 @@ namespace YOLOTools.YOLO
 
             responder.OnCollisionDetected();
         }
-        void DebugPositions(
-            float kartX,
-            float carX,
-            float carY,
-            bool xMatch,
-            bool isClose,
-            DetectedObject det
-        )
-        {
-            Debug.Log(
-                $"KartX: {kartX:F2} | " +
-                $"CarX: {carX:F2} | " +
-                $"CarY: {carY:F2} | " +
-                $"XMatch: {xMatch} | " +
-                $"Close: {isClose} | " +
-                $"Class: {det.CocoName}"
-            );
-        }
-        Rect ConvertYOLOToUnityRect(Rect r)
-        {
-
-            float xMin = r.xMin / referenceCamera.pixelWidth;
-            float xMax = r.xMax / referenceCamera.pixelWidth;
-            float yMin = 1f - (r.yMax / referenceCamera.pixelHeight);
-            float yMax = 1f - (r.yMin / referenceCamera.pixelHeight);
-
-            return Rect.MinMaxRect(xMin, yMin, xMax, yMax);
-        }
-
-        float GetOverlapArea(Rect a, Rect b)
-        {
-            float xOverlap = Mathf.Max(0, Mathf.Min(a.xMax, b.xMax) - Mathf.Max(a.xMin, b.xMin));
-            float yOverlap = Mathf.Max(0, Mathf.Min(a.yMax, b.yMax) - Mathf.Max(a.yMin, b.yMin));
-            return xOverlap * yOverlap;
-        }
-
-        void OnGUI()
-        {
-            if (responder == null || referenceCamera == null) return;
-
-            Rect kartRect = responder.GetScreenRect(referenceCamera);
-            
-        }
-
         
-        void DebugOverlap(Rect kartRect, Rect carRect, DetectedObject det)
-        {
-            Debug.Log(
-                $" Kart:{kartRect} | Car:{carRect} | Class:{det.CocoName}"
-            );
-        }
 
         
 

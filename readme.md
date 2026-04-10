@@ -1,6 +1,9 @@
 # AR in the Car
 This project is an immersive augmented reality car game for car passengers. It uses YOLO level to detect cars, and other traffic objects on the road and tasks the player to control and UFOO doging in between the cars to collect coins, and increase their score.
 
+Due to my assest files being too big to upload to moodle. I have stored them on a public github, you can access this here:
+https://github.com/JoePaechter/Diss-Car-Game
+
 File structure:
 - All important game files can be found in Assets/KartAndTracj_Scripts with the exception of CollisionResponderInterface.cs and CollisionManager.cs which can be found
 in Assets/YOLOTools/YOLO
@@ -40,7 +43,7 @@ in Assets/YOLOTools/YOLO
     - Ensure that the DissCarGame scence is selected in the Scene List
     - Select Build
     - To Successfully Build you Must have a Meta Quest Three headset, in develepor mode, connected to your PC when you build the game
-    - After a succesfful build you can open the game on your headset, the file will be under unkown sources
+    - After a succesful build you can open the game on your headset, the file will be under unkown sources
 
 
 
