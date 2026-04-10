@@ -1,3 +1,4 @@
+// This code was written by Matthew Lyon, it is used under the MIT lience
 using Trev3d.Quest.ScreenCapture;
 using UnityEngine;
 using UnityEngine.Events;

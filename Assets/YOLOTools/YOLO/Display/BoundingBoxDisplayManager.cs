@@ -1,15 +1,16 @@
 
-using AYellowpaper.SerializedCollections;
-using Meta.XR;
-using Meta.XR.MRUtilityKit;
+//commented out libararies im not using anymore
+//using AYellowpaper.SerializedCollections;
+//using Meta.XR;
+//using Meta.XR.MRUtilityKit;
 using MyBox;
 using NUnit.Framework.Constraints;
-using System;
+//using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Profiling;
-using YOLOTools.ObjectDetection;
+//using YOLOTools.ObjectDetection;
 using YOLOTools.Utilities;
 using YOLOTools.YOLO.ObjectDetection;
 using UnityEngine.UI;
@@ -77,12 +78,11 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
     private class PredictedVisual
     {
-
         public BoundingBoxVisual Visual;
         public Vector2 CurrentMin; //predicted min and max
         public Vector2 CurrentMax;
 
-        public Vector2 RawMin; //raw yolo min and max
+        public Vector2 RawMin; //raw yolo min and max in screen coordinates
         public Vector2 RawMax;
         public Vector2 VelocityMin; // how fast the box is moving (lag)
         public Vector2 VelocityMax;
@@ -92,10 +92,6 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
         public DetectedObject lastObject;
         public int FrameCount;
-
-        
-
-
     }
 
     //list of bounding boxes created, dont wanna throw them away, saves memory
@@ -121,7 +117,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         shieldImage.enabled = false;*/
 
         
-        //create frame
+        //create warning border
         GameObject borderObject = new GameObject("Border");
         borderObject.transform.SetParent(transform);
         border = borderObject.AddComponent<LineRenderer>();
@@ -272,8 +268,6 @@ public class BoundingBoxDisplayManager : MonoBehaviour
                 if(predict.lastObject.CocoName == "traffic light" || predict.lastObject.CocoName == "stop sign" || predict.lastObject.CocoName == "bus" || predict.lastObject.CocoName == "laptop")
                 {
                     trafficLightOnScreen = true;
-                    //SpriteFill(predict.CurrentMin.x, predict.CurrentMin.y, predict.CurrentMax.x - predict.CurrentMin.x, predict.CurrentMax.y - predict.CurrentMin.y);
-                    //XSprite.enabled = true;
                     //PLAY SOUND HERE
                     //inv.playBusSound();
                     DrawPridictedCross(predict);
@@ -282,7 +276,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
                //DrawPredictedBox(predict);
             }
         }
-        checkForButton();
+        CheckForButton();
 
         
     }
@@ -297,15 +291,15 @@ public class BoundingBoxDisplayManager : MonoBehaviour
     {
         Vector2 newMin = ImageToScreenCoordinates(newObj.BoundingBox.min);
         Vector2 newMax = ImageToScreenCoordinates(newObj.BoundingBox.max);
-        float dt = captureTime - predict.LastSeenCaptureTime;
+        float changeInTime = captureTime - predict.LastSeenCaptureTime;
 
-        if (dt > 0.001f)
+        if (changeInTime > 0.001f)
         {
-            Vector2 rawVelMin = (newMin - predict.RawMin) / dt;
-            Vector2 rawVelMax = (newMax - predict.RawMax) / dt;
+            Vector2 rawVelocityMin = (newMin - predict.RawMin) / changeInTime;
+            Vector2 rawVelocityMax = (newMax - predict.RawMax) / changeInTime;
 
-            predict.VelocityMin = Vector2.Lerp(predict.VelocityMin, rawVelMin, velocirty_smoothing);
-            predict.VelocityMax = Vector2.Lerp(predict.VelocityMax, rawVelMax, velocirty_smoothing);
+            predict.VelocityMin = Vector2.Lerp(predict.VelocityMin, rawVelocityMin, velocirty_smoothing);
+            predict.VelocityMax = Vector2.Lerp(predict.VelocityMax, rawVelocityMax, velocirty_smoothing);
         }
 
         predict.RawMin = newMin;
@@ -340,7 +334,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
             visual.root.SetActive(false);
         }
 
-        //warn player of bus
+        //warn player of bus, laptop just for testing
 
         if (obj.CocoName == "bus"|| obj.CocoName == "laptop")
         {
@@ -366,6 +360,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
 
     }
 
+    //this is not called unless testing normal boudning boxes
     private void DrawPredictedBox(PredictedVisual predict)
     {
         Vector3[] corners = new Vector3[5];
@@ -586,22 +581,7 @@ public class BoundingBoxDisplayManager : MonoBehaviour
     private Vector3 ScreenToWorld(float x, float y)
     {
         return _camera.ScreenToWorldPoint(
-        new Vector3(x, y, _depthFromCamera)
-);
-    }
-
-    public void ClearModels()
-    {
-        foreach (var p in predicted)
-        {
-            if(p.Visual.root != null)
-            {
-                Destroy(p.Visual.root);
-            }
-            
-        }
-        predicted.Clear();
-
+        new Vector3(x, y, _depthFromCamera));
     }
 
 
@@ -622,10 +602,9 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         var newX = coordinates.x + xOffset;
         var newY = (feedDimensions.Height - coordinates.y) + yOffset;
 
-        
-        
+
         return new Vector2(newX, newY - 200f);
-        //return new Vector2(newX, newY);
+      
 
     }
 
@@ -641,9 +620,6 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         float y = (feedDimensions.Height - coordinates.y) + yOffset;
 
 
-
-
-        //return new Vector2(x, y);
         return new Vector2(x, y - 200f);
 
     }
@@ -670,12 +646,10 @@ public class BoundingBoxDisplayManager : MonoBehaviour
     
     
 
-    public void checkForButton()
+    public void CheckForButton()
     {
         if (!trafficLightOnScreen)
         {
-            //shieldImage.enabled = false;
-            //shieldRect.gameObject.SetActive(false);
             border.enabled = false;
            if  (BusPowerUpTimer > BusPowerUpWindow)
             {
@@ -693,8 +667,6 @@ public class BoundingBoxDisplayManager : MonoBehaviour
         {
             if (pressed && !XbuttonPressed) {
                 inv.TurnOnInv();
-                Debug.Log("inv on!");
-                Debug.Log("inv on!");
                 XbuttonPressed = true;
             }
             }

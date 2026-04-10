@@ -1,3 +1,4 @@
+// This code was written by Matthew Lyon, it is used under the MIT lience
 using System.Net;
 using System.Text;
 using System;

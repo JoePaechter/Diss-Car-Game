@@ -1,3 +1,5 @@
+// This code was written by Matthew Lyon, with slight alterations by me, it is used under the MIT lience
+
 using MyBox;
 using Newtonsoft.Json;
 using System;

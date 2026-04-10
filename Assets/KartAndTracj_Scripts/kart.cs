@@ -47,7 +47,6 @@ public class kart : MonoBehaviour, CollisionResponderInterface
     public float haptic_amplitude;
     public float haptic_duration;
 
-    //crash sound
     public AudioSource carCrashSound;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -117,7 +116,7 @@ public class kart : MonoBehaviour, CollisionResponderInterface
             steer_input_x = 0f;
         }
 
-        //raise to power 2 for more dramatic dynamic steering
+        //raise to power 2 for dynamic steering
         steer_input_x = Mathf.Sign(steer_input_x) * Mathf.Pow(Mathf.Abs(steer_input_x), 2f);
 
         currentX += steer_input_x * steer_speed * Time.deltaTime;
@@ -145,26 +144,6 @@ public class kart : MonoBehaviour, CollisionResponderInterface
             Time.deltaTime * 8f );
     }
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.GetComponent<CarProxy>())
-        {
-            if (!collidingWithCar)
-            {
-                collidingWithCar = true;
-                OnCarHit();
-            }
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.GetComponent<CarProxy>())
-        {
-            collidingWithCar = false;
-            OnCarExit();
-        }
-    }
 
     public void OnCarHit()
     {
@@ -186,21 +165,21 @@ public class kart : MonoBehaviour, CollisionResponderInterface
 
     public Rect GetScreenRect(Camera cam)
     {
-        Bounds b = kartRenderer.bounds;
+        Bounds bounds = kartRenderer.bounds;
 
-        Vector3 center = b.center;
-        Vector3 ext = b.extents;
+        Vector3 center = bounds.center;
+        Vector3 extents = bounds.extents;
 
         Vector3[] corners =
         {
-        center + new Vector3(-ext.x, -ext.y, -ext.z),
-        center + new Vector3(-ext.x, -ext.y,  ext.z),
-        center + new Vector3(-ext.x,  ext.y, -ext.z),
-        center + new Vector3(-ext.x,  ext.y,  ext.z),
-        center + new Vector3( ext.x, -ext.y, -ext.z),
-        center + new Vector3( ext.x, -ext.y,  ext.z),
-        center + new Vector3( ext.x,  ext.y, -ext.z),
-        center + new Vector3( ext.x,  ext.y,  ext.z),
+        center + new Vector3(-extents.x, -extents.y, -extents.z),
+        center + new Vector3(-extents.x, -extents.y,  extents.z),
+        center + new Vector3(-extents.x,  extents.y, -extents.z),
+        center + new Vector3(-extents.x,  extents.y,  extents.z),
+        center + new Vector3( extents.x, -extents.y, -extents.z),
+        center + new Vector3( extents.x, -extents.y,  extents.z),
+        center + new Vector3( extents.x,  extents.y, -extents.z),
+        center + new Vector3( extents.x,  extents.y,  extents.z),
     };
 
         float minX = 1f, minY = 1f;
